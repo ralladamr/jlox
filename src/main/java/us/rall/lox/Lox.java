@@ -25,6 +25,20 @@ public class Lox {
         report(line, "", message);
     }
 
+    /**
+     * Reports an error message.
+     *
+     * @param token   The token being parsed when the error occurred.
+     * @param message The error message.
+     */
+    static void error(Token token, String message) {
+        if (token.getType() == TokenType.EOF) {
+            report(token.getLine(), " at end", message);
+        } else {
+            report(token.getLine(), " at '%s'".formatted(token.getLexeme()), message);
+        }
+    }
+
     public static void main(String[] args) throws IOException {
         if (args.length > 1) {
             System.out.println("usage: jlox [script]");
@@ -47,9 +61,13 @@ public class Lox {
     private static void run(String source) {
         Scanner scanner = new Scanner(source);
         List<Token> tokens = scanner.scanTokens();
-        for (Token token : tokens) {
-            System.out.println(token);
+        Parser parser = new Parser(tokens);
+        Expr expr = parser.parse();
+        if (hadError) {
+            return;
         }
+        AstPrinter printer = new AstPrinter();
+        System.out.println(printer.print(expr));
     }
 
     private static void runFile(String path) throws IOException {

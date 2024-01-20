@@ -8,7 +8,6 @@ public class Token {
     private final String lexeme;
     private final Object literal;
     private final int line;
-
     /**
      * Class constructor specifying all parts of token.
      *
@@ -24,8 +23,20 @@ public class Token {
         this.line = line;
     }
 
+    public TokenType getType() {
+        return type;
+    }
+
     public String getLexeme() {
         return lexeme;
+    }
+
+    public int getLine() {
+        return line;
+    }
+
+    public Object getLiteral() {
+        return literal;
     }
 
     @Override

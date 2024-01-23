@@ -38,7 +38,7 @@ class Parser {
         if (isAtEnd()) {
             return false;
         }
-        return peek().getType() == type;
+        return peek().type() == type;
     }
 
     private Token consume(TokenType type, String message) {
@@ -54,7 +54,7 @@ class Parser {
     }
 
     private boolean isAtEnd() {
-        return peek().getType() == TokenType.EOF;
+        return peek().type() == TokenType.EOF;
     }
 
     private boolean match(TokenType... types) {
@@ -78,10 +78,10 @@ class Parser {
     private void synchronize() {
         advance();
         while (!isAtEnd()) {
-            if (previous().getType() == TokenType.SEMICOLON) {
+            if (previous().type() == TokenType.SEMICOLON) {
                 return;
             }
-            switch (peek().getType()) {
+            switch (peek().type()) {
                 case CLASS, FOR, FUN, IF, PRINT, RETURN, VAR, WHILE -> {
                     return;
                 }
@@ -155,7 +155,7 @@ class Parser {
             return new Expr.Literal(null);
         }
         if (match(TokenType.NUMBER, TokenType.STRING)) {
-            return new Expr.Literal(previous().getLiteral());
+            return new Expr.Literal(previous().literal());
         }
         if (match(TokenType.LEFT_PAREN)) {
             Expr expr = expression();

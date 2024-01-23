@@ -34,10 +34,10 @@ public class Lox {
      * @param message The error message.
      */
     static void error(Token token, String message) {
-        if (token.getType() == TokenType.EOF) {
-            report(token.getLine(), " at end", message);
+        if (token.type() == TokenType.EOF) {
+            report(token.line(), " at end", message);
         } else {
-            report(token.getLine(), " at '%s'".formatted(token.getLexeme()), message);
+            report(token.line(), " at '%s'".formatted(token.lexeme()), message);
         }
     }
 
@@ -104,7 +104,7 @@ public class Lox {
      */
     static void runtimeError(RuntimeError error) {
         String message = error.getMessage();
-        int line = error.getToken().getLine();
+        int line = error.getToken().line();
         System.err.printf("%s\n[line %s]%n", message, line);
         hadRuntimeError = true;
     }

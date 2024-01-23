@@ -68,7 +68,7 @@ class Interpreter implements Expr.Visitor<Object> {
         Object left = evaluate(expr.getLeft());
         Object right = evaluate(expr.getRight());
         Token operator = expr.getOperator();
-        return switch (operator.getType()) {
+        return switch (operator.type()) {
             case PLUS -> {
                 if (left instanceof Double && right instanceof Double) {
                     yield (double) left + (double) right;
@@ -126,7 +126,7 @@ class Interpreter implements Expr.Visitor<Object> {
     public Object visitUnaryExpr(Expr.Unary expr) {
         Object right = evaluate(expr.getRight());
         Token operator = expr.getOperator();
-        return switch (operator.getType()) {
+        return switch (operator.type()) {
             case MINUS -> {
                 checkNumberOperand(operator, right);
                 yield -(double) right;

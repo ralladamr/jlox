@@ -40,7 +40,7 @@ abstract class Stmt {
      * Represents a Lox expression statement.
      */
     static class Expression extends Stmt {
-        final Expr expression;
+        private final Expr expression;
 
         Expression(Expr expression) {
             this.expression = expression;
@@ -50,13 +50,17 @@ abstract class Stmt {
         <T> T accept(Visitor<T> visitor) {
             return visitor.visitExpressionStmt(this);
         }
+
+        public Expr getExpression() {
+            return expression;
+        }
     }
 
     /**
      * Represents a Lox print statement.
      */
     static class Print extends Stmt {
-        final Expr expression;
+        private final Expr expression;
 
         Print(Expr expression) {
             this.expression = expression;
@@ -65,6 +69,10 @@ abstract class Stmt {
         @Override
         <T> T accept(Visitor<T> visitor) {
             return visitor.visitPrintStmt(this);
+        }
+
+        public Expr getExpression() {
+            return expression;
         }
     }
 }

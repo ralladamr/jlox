@@ -1,9 +1,11 @@
 package us.rall.lox;
 
+import java.util.List;
+
 /**
  * A tree-walk interpreter for Lox.
  */
-class Interpreter implements Expr.Visitor<Object> {
+class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     private static void checkNumberOperand(Token operator, Object operand) {
         if (operand instanceof Double) {
             return;
@@ -50,14 +52,15 @@ class Interpreter implements Expr.Visitor<Object> {
     }
 
     /**
-     * Interpret a Lox expression.
+     * Interpret Lox statements.
      *
-     * @param expr The expression to interpret.
+     * @param statements The statements to interpret.
      */
-    void interpret(Expr expr) {
+    void interpret(List<Stmt> statements) {
         try {
-            Object value = evaluate(expr);
-            System.out.println(stringify(value));
+            for (Stmt statement : statements) {
+                execute(statement);
+            }
         } catch (RuntimeError e) {
             Lox.runtimeError(e);
         }
@@ -138,5 +141,22 @@ class Interpreter implements Expr.Visitor<Object> {
 
     private Object evaluate(Expr expr) {
         return expr.accept(this);
+    }
+
+    @Override
+    public Void visitExpressionStmt(Stmt.Expression stmt) {
+        evaluate(stmt.getExpression());
+        return null;
+    }
+
+    @Override
+    public Void visitPrintStmt(Stmt.Print stmt) {
+        Object value = evaluate(stmt.getExpression());
+        System.out.println(stringify(value));
+        return null;
+    }
+
+    private void execute(Stmt stmt) {
+        stmt.accept(this);
     }
 }

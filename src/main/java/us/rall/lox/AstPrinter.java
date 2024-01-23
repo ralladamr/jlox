@@ -1,6 +1,12 @@
 package us.rall.lox;
 
 class AstPrinter implements Expr.Visitor<String> {
+    /**
+     * Print an expression.
+     *
+     * @param expr The expression to print.
+     * @return A string representation of the expression.
+     */
     String print(Expr expr) {
         return expr.accept(this);
     }

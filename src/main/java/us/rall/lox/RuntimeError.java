@@ -1,5 +1,8 @@
 package us.rall.lox;
 
+/**
+ * A runtime error in the Lox interpreter.
+ */
 class RuntimeError extends RuntimeException {
     private final Token token;
 
@@ -8,6 +11,11 @@ class RuntimeError extends RuntimeException {
         this.token = token;
     }
 
+    /**
+     * Get the token where the error occurred.
+     *
+     * @return The error {@link Token}.
+     */
     public Token getToken() {
         return token;
     }

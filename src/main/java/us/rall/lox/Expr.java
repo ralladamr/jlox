@@ -1,18 +1,57 @@
 package us.rall.lox;
 
 abstract class Expr {
+    /**
+     * A method for the visitor pattern.
+     *
+     * @param visitor The visitor object.
+     * @param <T>     The type used to represent the expression.
+     * @return A representation of the expression.
+     */
     abstract <T> T accept(Visitor<T> visitor);
 
+    /**
+     * An interface for the visitor pattern.
+     *
+     * @param <T> The type of output on visiting an expression.
+     */
     interface Visitor<T> {
+        /**
+         * Visit a binary expression.
+         *
+         * @param expr The expression to visit.
+         * @return A representation of the expression.
+         */
         T visitBinaryExpr(Binary expr);
 
+        /**
+         * Visit a grouping expression.
+         *
+         * @param expr The expression to visit.
+         * @return A representation of the expression.
+         */
         T visitGroupingExpr(Grouping expr);
 
+        /**
+         * Visit a literal expression.
+         *
+         * @param expr The expression to visit.
+         * @return A representation of the expression.
+         */
         T visitLiteralExpr(Literal expr);
 
+        /**
+         * Visit a unary expression.
+         *
+         * @param expr The expression to visit.
+         * @return A string representation of the expression.
+         */
         T visitUnaryExpr(Unary expr);
     }
 
+    /**
+     * A binary expression.
+     */
     static class Binary extends Expr {
         private final Expr left;
         private final Token operator;
@@ -42,6 +81,9 @@ abstract class Expr {
         }
     }
 
+    /**
+     * A grouping expression.
+     */
     static class Grouping extends Expr {
         private final Expr expression;
 
@@ -59,6 +101,9 @@ abstract class Expr {
         }
     }
 
+    /**
+     * A literal expression.
+     */
     static class Literal extends Expr {
         private final Object value;
 
@@ -76,6 +121,9 @@ abstract class Expr {
         }
     }
 
+    /**
+     * A unary expression.
+     */
     static class Unary extends Expr {
         private final Token operator;
         private final Expr right;

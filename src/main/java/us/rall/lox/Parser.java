@@ -2,6 +2,9 @@ package us.rall.lox;
 
 import java.util.List;
 
+/**
+ * A parser for Lox source.
+ */
 class Parser {
     private final List<Token> tokens;
     private int current = 0;
@@ -10,6 +13,11 @@ class Parser {
         this.tokens = tokens;
     }
 
+    /**
+     * Parse an expression from the source.
+     *
+     * @return An {@link Expr}.
+     */
     Expr parse() {
         try {
             return expression();

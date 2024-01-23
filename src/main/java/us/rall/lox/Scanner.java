@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Scanner for parsing Lox source.
+ * A scanner for lexing Lox source.
  */
 public class Scanner {
     private static final Map<String, TokenType> keywords;

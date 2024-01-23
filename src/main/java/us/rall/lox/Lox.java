@@ -96,6 +96,12 @@ public class Lox {
         }
     }
 
+
+    /**
+     * Reports a runtime error.
+     *
+     * @param error The error to report.
+     */
     static void runtimeError(RuntimeError error) {
         String message = error.getMessage();
         int line = error.getToken().getLine();

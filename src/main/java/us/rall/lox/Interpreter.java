@@ -1,5 +1,8 @@
 package us.rall.lox;
 
+/**
+ * A tree-walk interpreter for Lox.
+ */
 class Interpreter implements Expr.Visitor<Object> {
     private static void checkNumberOperand(Token operator, Object operand) {
         if (operand instanceof Double) {
@@ -46,6 +49,11 @@ class Interpreter implements Expr.Visitor<Object> {
         return object.toString();
     }
 
+    /**
+     * Interpret a Lox expression.
+     *
+     * @param expr The expression to interpret.
+     */
     void interpret(Expr expr) {
         try {
             Object value = evaluate(expr);

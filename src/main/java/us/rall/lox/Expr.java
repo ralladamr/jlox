@@ -14,9 +14,9 @@ abstract class Expr {
     }
 
     static class Binary extends Expr {
-        final Expr left;
-        final Token operator;
-        final Expr right;
+        private final Expr left;
+        private final Token operator;
+        private final Expr right;
 
         Binary(Expr left, Token operator, Expr right) {
             this.left = left;
@@ -28,10 +28,22 @@ abstract class Expr {
         <T> T accept(Visitor<T> visitor) {
             return visitor.visitBinaryExpr(this);
         }
+
+        public Expr getLeft() {
+            return left;
+        }
+
+        public Token getOperator() {
+            return operator;
+        }
+
+        public Expr getRight() {
+            return right;
+        }
     }
 
     static class Grouping extends Expr {
-        final Expr expression;
+        private final Expr expression;
 
         Grouping(Expr expression) {
             this.expression = expression;
@@ -41,10 +53,14 @@ abstract class Expr {
         <T> T accept(Visitor<T> visitor) {
             return visitor.visitGroupingExpr(this);
         }
+
+        public Expr getExpression() {
+            return expression;
+        }
     }
 
     static class Literal extends Expr {
-        final Object value;
+        private final Object value;
 
         Literal(Object value) {
             this.value = value;
@@ -54,11 +70,15 @@ abstract class Expr {
         <T> T accept(Visitor<T> visitor) {
             return visitor.visitLiteralExpr(this);
         }
+
+        public Object getValue() {
+            return value;
+        }
     }
 
     static class Unary extends Expr {
-        final Token operator;
-        final Expr right;
+        private final Token operator;
+        private final Expr right;
 
         Unary(Token operator, Expr right) {
             this.operator = operator;
@@ -68,6 +88,14 @@ abstract class Expr {
         @Override
         <T> T accept(Visitor<T> visitor) {
             return visitor.visitUnaryExpr(this);
+        }
+
+        public Token getOperator() {
+            return operator;
+        }
+
+        public Expr getRight() {
+            return right;
         }
     }
 

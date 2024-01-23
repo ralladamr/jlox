@@ -1,5 +1,8 @@
 package us.rall.lox;
 
+/**
+ * Represents a Lox expression.
+ */
 abstract class Expr {
     /**
      * A method for the visitor pattern.

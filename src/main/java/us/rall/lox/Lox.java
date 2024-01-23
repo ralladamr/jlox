@@ -13,7 +13,9 @@ import java.util.List;
  * Lox REPL and some helper methods for reporting errors.
  */
 public class Lox {
-    private static boolean hadError;
+    private static final Interpreter interpreter = new Interpreter();
+    private static boolean hadError = false;
+    private static boolean hadRuntimeError = false;
 
     /**
      * Reports an error message.
@@ -66,8 +68,7 @@ public class Lox {
         if (hadError) {
             return;
         }
-        AstPrinter printer = new AstPrinter();
-        System.out.println(printer.print(expr));
+        interpreter.interpret(expr);
     }
 
     private static void runFile(String path) throws IOException {
@@ -75,6 +76,9 @@ public class Lox {
         run(new String(bytes, Charset.defaultCharset()));
         if (hadError) {
             System.exit(65);
+        }
+        if (hadRuntimeError) {
+            System.exit(70);
         }
     }
 
@@ -90,5 +94,12 @@ public class Lox {
             run(line);
             hadError = false;
         }
+    }
+
+    static void runtimeError(RuntimeError error) {
+        String message = error.getMessage();
+        int line = error.getToken().getLine();
+        System.err.printf("%s\n[line %s]%n", message, line);
+        hadRuntimeError = true;
     }
 }

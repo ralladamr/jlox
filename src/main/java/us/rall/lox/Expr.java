@@ -47,9 +47,16 @@ abstract class Expr {
          * Visit a unary expression.
          *
          * @param expr The expression to visit.
-         * @return A string representation of the expression.
+         * @return A representation of the expression.
          */
         T visitUnaryExpr(Unary expr);
+
+        /**
+         * Visit a variable expression.
+         * @param expr The expression to visit.
+         * @return A representation of the expression.
+         */
+        T visitVariableExpr(Variable expr);
     }
 
     /**
@@ -150,4 +157,23 @@ abstract class Expr {
         }
     }
 
+    /**
+     * A variable expression.
+     */
+    static class Variable extends Expr {
+        private final Token name;
+
+        Variable(Token name) {
+            this.name = name;
+        }
+
+        @Override
+        <T> T accept(Visitor<T> visitor) {
+            return visitor.visitVariableExpr(this);
+        }
+
+        public Token getName() {
+            return name;
+        }
+    }
 }

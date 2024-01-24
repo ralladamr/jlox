@@ -6,6 +6,8 @@ import java.util.List;
  * A tree-walk interpreter for Lox.
  */
 class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
+    private final Environment environment = new Environment();
+
     private static void checkNumberOperand(Token operator, Object operand) {
         if (operand instanceof Double) {
             return;
@@ -139,6 +141,11 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
         };
     }
 
+    @Override
+    public Object visitVariableExpr(Expr.Variable expr) {
+        return environment.get(expr.getName());
+    }
+
     private Object evaluate(Expr expr) {
         return expr.accept(this);
     }
@@ -153,6 +160,17 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     public Void visitPrintStmt(Stmt.Print stmt) {
         Object value = evaluate(stmt.getExpression());
         System.out.println(stringify(value));
+        return null;
+    }
+
+    @Override
+    public Void visitVarStmt(Stmt.Var stmt) {
+        Object value = null;
+        Expr initializer = stmt.getInitializer();
+        if (initializer != null) {
+            value = evaluate(initializer);
+        }
+        environment.define(stmt.getName().lexeme(), value);
         return null;
     }
 

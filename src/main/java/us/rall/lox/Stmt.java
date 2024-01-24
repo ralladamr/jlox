@@ -34,6 +34,14 @@ abstract class Stmt {
          * @return A representation of the statement.
          */
         T visitPrintStmt(Print stmt);
+
+        /**
+         * Visit a var statment.
+         *
+         * @param stmt The statement to visit.
+         * @return A representation of the statement.
+         */
+        T visitVarStmt(Var stmt);
     }
 
     /**
@@ -73,6 +81,32 @@ abstract class Stmt {
 
         public Expr getExpression() {
             return expression;
+        }
+    }
+
+    /**
+     * Represents a variable declaration statement.
+     */
+    static class Var extends Stmt {
+        private final Token name;
+        private final Expr initializer;
+
+        Var(Token name, Expr initializer) {
+            this.name = name;
+            this.initializer = initializer;
+        }
+
+        @Override
+        <T> T accept(Visitor<T> visitor) {
+            return visitor.visitVarStmt(this);
+        }
+
+        public Token getName() {
+            return name;
+        }
+
+        public Expr getInitializer() {
+            return initializer;
         }
     }
 }

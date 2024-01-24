@@ -7,7 +7,16 @@ import java.util.Map;
  * Represents a Lox environment.
  */
 public class Environment {
+    final Environment enclosing;
     private final Map<String, Object> values = new HashMap<>();
+
+    public Environment() {
+        enclosing = null;
+    }
+
+    public Environment(Environment enclosing) {
+        this.enclosing = enclosing;
+    }
 
     /**
      * Get a variable by name.
@@ -19,6 +28,9 @@ public class Environment {
         String lexeme = name.lexeme();
         if (values.containsKey(lexeme)) {
             return values.get(lexeme);
+        }
+        if (enclosing != null) {
+            return enclosing.get(name);
         }
         throw new RuntimeError(name, "Undefined variable '%s'.".formatted(lexeme));
     }
@@ -33,6 +45,10 @@ public class Environment {
         String lexeme = name.lexeme();
         if (values.containsKey(lexeme)) {
             values.put(lexeme, value);
+            return;
+        }
+        if (enclosing != null) {
+            enclosing.assign(name, value);
             return;
         }
         throw new RuntimeError(name, "Undefined variable'%s'.".formatted(lexeme));

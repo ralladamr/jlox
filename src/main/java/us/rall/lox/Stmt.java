@@ -1,5 +1,7 @@
 package us.rall.lox;
 
+import java.util.List;
+
 /**
  * Represents a Lox statement.
  */
@@ -20,6 +22,14 @@ abstract class Stmt {
      */
     interface Visitor<T> {
         /**
+         * Visit a block statement.
+         *
+         * @param stmt The statement to visit.
+         * @return A representation of the statement.
+         */
+        T visitBlockStmt(Block stmt);
+
+        /**
          * Visit an expression statement.
          *
          * @param stmt The statement to visit.
@@ -36,12 +46,32 @@ abstract class Stmt {
         T visitPrintStmt(Print stmt);
 
         /**
-         * Visit a var statment.
+         * Visit a var statement.
          *
          * @param stmt The statement to visit.
          * @return A representation of the statement.
          */
         T visitVarStmt(Var stmt);
+    }
+
+    /**
+     * Represents a Lox block statement.
+     */
+    static class Block extends Stmt {
+        private final List<Stmt> statements;
+
+        Block(List<Stmt> statements) {
+            this.statements = statements;
+        }
+
+        @Override
+        <T> T accept(Visitor<T> visitor) {
+            return visitor.visitBlockStmt(this);
+        }
+
+        public List<Stmt> getStatements() {
+            return statements;
+        }
     }
 
     /**

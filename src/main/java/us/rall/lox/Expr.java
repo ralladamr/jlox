@@ -20,6 +20,14 @@ abstract class Expr {
      */
     interface Visitor<T> {
         /**
+         * Visit an assignment expression.
+         *
+         * @param expr The expression to visit.
+         * @return A representation of the expression.
+         */
+        T visitAssignExpr(Assign expr);
+
+        /**
          * Visit a binary expression.
          *
          * @param expr The expression to visit.
@@ -53,10 +61,37 @@ abstract class Expr {
 
         /**
          * Visit a variable expression.
+         *
          * @param expr The expression to visit.
          * @return A representation of the expression.
          */
         T visitVariableExpr(Variable expr);
+    }
+
+    /**
+     * An assignment expression.
+     */
+    static class Assign extends Expr {
+        private final Token name;
+        private final Expr value;
+
+        Assign(Token name, Expr value) {
+            this.name = name;
+            this.value = value;
+        }
+
+        @Override
+        <T> T accept(Visitor<T> visitor) {
+            return visitor.visitAssignExpr(this);
+        }
+
+        public Token getName() {
+            return name;
+        }
+
+        public Expr getValue() {
+            return value;
+        }
     }
 
     /**

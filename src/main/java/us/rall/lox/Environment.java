@@ -24,6 +24,21 @@ public class Environment {
     }
 
     /**
+     * Assign a value to a variable.
+     *
+     * @param name  The name of the variable.
+     * @param value The value of the variable.
+     */
+    void assign(Token name, Object value) {
+        String lexeme = name.lexeme();
+        if (values.containsKey(lexeme)) {
+            values.put(lexeme, value);
+            return;
+        }
+        throw new RuntimeError(name, "Undefined variable'%s'.".formatted(lexeme));
+    }
+
+    /**
      * Define a variable.
      *
      * @param name  The name of the variable.

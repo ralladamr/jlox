@@ -95,6 +95,9 @@ class Parser {
     // Parser rules.
     private Stmt declaration() {
         try {
+            if (match(TokenType.FUN)) {
+                return function("function");
+            }
             if (match(TokenType.VAR)) {
                 return varDeclaration();
             }
@@ -103,6 +106,25 @@ class Parser {
             synchronize();
             return null;
         }
+    }
+
+    @SuppressWarnings("ThrowableNotThrown")
+    private Stmt function(String kind) {
+        Token name = consume(TokenType.IDENTIFIER, "Expect %s name.".formatted(kind));
+        consume(TokenType.LEFT_PAREN, "Expect '(' after %s name.".formatted(kind));
+        List<Token> params = new ArrayList<>();
+        if (!check(TokenType.RIGHT_PAREN)) {
+            do {
+                if (params.size() >= 255) {
+                    error(peek(), "Can't have more than 255 parameters.");
+                }
+                params.add(consume(TokenType.IDENTIFIER, "Expect parameter name."));
+            } while (match(TokenType.COMMA));
+        }
+        consume(TokenType.RIGHT_PAREN, "Expect ')' after parameters.");
+        consume(TokenType.LEFT_BRACE, "Expect '{' before %s body.".formatted(kind));
+        List<Stmt> body = block();
+        return new Stmt.Function(name, params, body);
     }
 
     private Stmt varDeclaration() {
@@ -124,6 +146,9 @@ class Parser {
         }
         if (match(TokenType.PRINT)) {
             return printStatement();
+        }
+        if (match(TokenType.RETURN)) {
+            return returnStatement();
         }
         if (match(TokenType.WHILE)) {
             return whileStatement();
@@ -187,6 +212,16 @@ class Parser {
         Expr expr = expression();
         consume(TokenType.SEMICOLON, "Expect ';' after value.");
         return new Stmt.Print(expr);
+    }
+
+    private Stmt returnStatement() {
+        Token keyword = previous();
+        Expr value = null;
+        if (!check(TokenType.SEMICOLON)) {
+            value = expression();
+        }
+        consume(TokenType.SEMICOLON, "Expect ';' after return value.");
+        return new Stmt.Return(keyword, value);
     }
 
     private Stmt whileStatement() {
@@ -297,7 +332,34 @@ class Parser {
             Expr right = unary();
             return new Expr.Unary(operator, right);
         }
-        return primary();
+        return call();
+    }
+
+    private Expr call() {
+        Expr expr = primary();
+        while (true) {
+            if (match(TokenType.LEFT_PAREN)) {
+                expr = finishCall(expr);
+            } else {
+                break;
+            }
+        }
+        return expr;
+    }
+
+    @SuppressWarnings("ThrowableNotThrown")
+    private Expr finishCall(Expr callee) {
+        List<Expr> arguments = new ArrayList<>();
+        if (!check(TokenType.RIGHT_PAREN)) {
+            do {
+                if (arguments.size() >= 255) {
+                    error(peek(), "Can't have more than 255 arguments.");
+                }
+                arguments.add(expression());
+            } while (match(TokenType.COMMA));
+        }
+        Token paren = consume(TokenType.RIGHT_PAREN, "Expect ')' after arguments.");
+        return new Expr.Call(callee, paren, arguments);
     }
 
     private Expr primary() {

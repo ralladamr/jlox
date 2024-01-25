@@ -38,6 +38,14 @@ abstract class Stmt {
         T visitExpressionStmt(Expression stmt);
 
         /**
+         * Visit a function statement.
+         *
+         * @param stmt The statement to visit.
+         * @return A representation of the statement.
+         */
+        T visitFunctionStmt(Function stmt);
+
+        /**
          * Visit an if statement.
          *
          * @param stmt The statement to visit.
@@ -52,6 +60,14 @@ abstract class Stmt {
          * @return A representation of the statement.
          */
         T visitPrintStmt(Print stmt);
+
+        /**
+         * Visit a return statement.
+         *
+         * @param stmt The statement to visit.
+         * @return A representation of the statement.
+         */
+        T visitReturnStmt(Return stmt);
 
         /**
          * Visit a while statement.
@@ -111,6 +127,38 @@ abstract class Stmt {
     }
 
     /**
+     * Represents a function statement.
+     */
+    static class Function extends Stmt {
+        private final Token name;
+        private final List<Token> params;
+        private final List<Stmt> body;
+
+        Function(Token name, List<Token> params, List<Stmt> body) {
+            this.name = name;
+            this.params = params;
+            this.body = body;
+        }
+
+        @Override
+        <T> T accept(Visitor<T> visitor) {
+            return visitor.visitFunctionStmt(this);
+        }
+
+        public Token getName() {
+            return name;
+        }
+
+        public List<Token> getParams() {
+            return params;
+        }
+
+        public List<Stmt> getBody() {
+            return body;
+        }
+    }
+
+    /**
      * Represents a Lox if statement.
      */
     static class If extends Stmt {
@@ -159,6 +207,32 @@ abstract class Stmt {
 
         public Expr getExpression() {
             return expression;
+        }
+    }
+
+    /**
+     * Represents a return statement.
+     */
+    static class Return extends Stmt {
+        private final Token keyword;
+        private final Expr value;
+
+        Return(Token keyword, Expr value) {
+            this.keyword = keyword;
+            this.value = value;
+        }
+
+        @Override
+        <T> T accept(Visitor<T> visitor) {
+            return visitor.visitReturnStmt(this);
+        }
+
+        public Token getKeyword() {
+            return keyword;
+        }
+
+        public Expr getValue() {
+            return value;
         }
     }
 

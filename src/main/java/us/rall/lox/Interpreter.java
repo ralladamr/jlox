@@ -1,12 +1,33 @@
 package us.rall.lox;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
  * A tree-walk interpreter for Lox.
  */
 class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
-    private Environment environment = new Environment();
+    private final Environment globals = new Environment();
+    private Environment environment = globals;
+
+    Interpreter() {
+        globals.define("clock", new LoxCallable() {
+            @Override
+            public int arity() {
+                return 0;
+            }
+
+            @Override
+            public Object call(Interpreter interpreter, List<Object> arguments) {
+                return (double) System.currentTimeMillis() / 1000.0;
+            }
+
+            @Override
+            public String toString() {
+                return "<native fn>";
+            }
+        });
+    }
 
     private static void checkNumberOperand(Token operator, Object operand) {
         if (operand instanceof Double) {
@@ -87,7 +108,7 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
                 } else if (left instanceof String && right instanceof String) {
                     yield "%s%s".formatted(left, right);
                 } else {
-                    throw new RuntimeError(operator, "Operands must be two numbers or two strings");
+                    throw new RuntimeError(operator, "Operands must be two numbers or two strings.");
                 }
             }
             case MINUS -> {
@@ -122,6 +143,23 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
             case EQUAL_EQUAL -> isEqual(left, right);
             default -> null;
         };
+    }
+
+    @Override
+    public Object visitCallExpr(Expr.Call expr) {
+        Object callee = evaluate(expr.getCallee());
+        List<Object> arguments = new ArrayList<>();
+        for (Expr argument : expr.getArguments()) {
+            arguments.add(evaluate(argument));
+        }
+        if (!(callee instanceof LoxCallable function)) {
+            throw new RuntimeError(expr.getParen(), "Can only call functions and classes.");
+        }
+        if (arguments.size() != function.arity()) {
+            throw new RuntimeError(expr.getParen(),
+                    "Expected %s arguments but got %s.".formatted(function.arity(), arguments.size()));
+        }
+        return function.call(this, arguments);
     }
 
     @Override
@@ -183,6 +221,13 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     }
 
     @Override
+    public Void visitFunctionStmt(Stmt.Function stmt) {
+        LoxFunction function = new LoxFunction(stmt, environment);
+        environment.define(stmt.getName().lexeme(), function);
+        return null;
+    }
+
+    @Override
     public Void visitIfStmt(Stmt.If stmt) {
         if (isTruthy(evaluate(stmt.getCondition()))) {
             execute(stmt.getThenBranch());
@@ -197,6 +242,15 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
         Object value = evaluate(stmt.getExpression());
         System.out.println(stringify(value));
         return null;
+    }
+
+    @Override
+    public Void visitReturnStmt(Stmt.Return stmt) {
+        Object value = null;
+        if (stmt.getValue() != null) {
+            value = evaluate(stmt.getValue());
+        }
+        throw new Return(value);
     }
 
     @Override
@@ -222,7 +276,7 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
         stmt.accept(this);
     }
 
-    private void executeBlock(List<Stmt> statements, Environment environment) {
+    void executeBlock(List<Stmt> statements, Environment environment) {
         Environment previous = this.environment;
         try {
             this.environment = environment;

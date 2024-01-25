@@ -1,5 +1,7 @@
 package us.rall.lox;
 
+import java.util.List;
+
 /**
  * Represents a Lox expression.
  */
@@ -34,6 +36,14 @@ abstract class Expr {
          * @return A representation of the expression.
          */
         T visitBinaryExpr(Binary expr);
+
+        /**
+         * Visit a call expression.
+         *
+         * @param expr The expression to visit.
+         * @return A representation of the expression.
+         */
+        T visitCallExpr(Call expr);
 
         /**
          * Visit a grouping expression.
@@ -131,6 +141,38 @@ abstract class Expr {
 
         public Expr getRight() {
             return right;
+        }
+    }
+
+    /**
+     * A call expression.
+     */
+    static class Call extends Expr {
+        private final Expr callee;
+        private final Token paren;
+        private final List<Expr> arguments;
+
+        Call(Expr callee, Token paren, List<Expr> arguments) {
+            this.callee = callee;
+            this.paren = paren;
+            this.arguments = arguments;
+        }
+
+        @Override
+        <T> T accept(Visitor<T> visitor) {
+            return visitor.visitCallExpr(this);
+        }
+
+        public Expr getCallee() {
+            return callee;
+        }
+
+        public Token getParen() {
+            return paren;
+        }
+
+        public List<Expr> getArguments() {
+            return arguments;
         }
     }
 

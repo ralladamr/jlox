@@ -18,6 +18,10 @@ public class Environment {
         this.enclosing = enclosing;
     }
 
+    public Environment getEnclosing() {
+        return enclosing;
+    }
+
     /**
      * Get a variable by name.
      *
@@ -89,7 +93,7 @@ public class Environment {
     private Environment ancestor(int distance) {
         Environment environment = this;
         for (int i = 0; i < distance; i++) {
-            environment = environment.enclosing;
+            environment = environment.getEnclosing();
         }
         return environment;
     }

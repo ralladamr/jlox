@@ -227,6 +227,18 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     }
 
     @Override
+    public Object visitSuperExpr(Expr.Super expr) {
+        int distance = locals.get(expr);
+        LoxClass superclass = (LoxClass) environment.getAt(distance, "super");
+        LoxInstance object = (LoxInstance) environment.getAt(distance - 1, "this");
+        LoxFunction method = superclass.findMethod(expr.getMethod().lexeme());
+        if (method == null) {
+            throw new RuntimeError(expr.getMethod(), "Undefined property '%s'.".formatted(expr.getMethod().lexeme()));
+        }
+        return method.bind(object);
+    }
+
+    @Override
     public Object visitThisExpr(Expr.This expr) {
         return lookUpVariable(expr.getKeyword(), expr);
     }
@@ -270,15 +282,29 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
     @Override
     public Void visitClassStmt(Stmt.Class stmt) {
+        Object superclass = null;
+        if (stmt.getSuperclass() != null) {
+            superclass = evaluate(stmt.getSuperclass());
+            if (!(superclass instanceof LoxClass)) {
+                throw new RuntimeError(stmt.getSuperclass().getName(), "Superclass must be a class.");
+            }
+        }
         Token stmtName = stmt.getName();
         environment.define(stmtName.lexeme(), null);
+        if (stmt.getSuperclass() != null) {
+            environment = new Environment(environment);
+            environment.define("super", superclass);
+        }
         Map<String, LoxFunction> methods = new HashMap<>();
         for (Stmt.Function method : stmt.getMethods()) {
             String methodLexeme = method.getName().lexeme();
             LoxFunction function = new LoxFunction(method, environment, methodLexeme.equals("init"));
             methods.put(methodLexeme, function);
         }
-        LoxClass klass = new LoxClass(stmtName.lexeme(), methods);
+        LoxClass klass = new LoxClass(stmtName.lexeme(), (LoxClass) superclass, methods);
+        if (superclass != null) {
+            environment = environment.getEnclosing();
+        }
         environment.assign(stmtName, klass);
         return null;
     }

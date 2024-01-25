@@ -86,6 +86,14 @@ abstract class Expr {
         T visitSetExpr(Set expr);
 
         /**
+         * Visit a super expression.
+         *
+         * @param expr The expression to visit.
+         * @return A representation of the expression.
+         */
+        T visitSuperExpr(Super expr);
+
+        /**
          * Visit a this expression.
          *
          * @param expr The expression to visit.
@@ -327,6 +335,32 @@ abstract class Expr {
 
         public Expr getValue() {
             return value;
+        }
+    }
+
+    /**
+     * A super expression.
+     */
+    static class Super extends Expr {
+        private final Token keyword;
+        private final Token method;
+
+        Super(Token keyword, Token method) {
+            this.keyword = keyword;
+            this.method = method;
+        }
+
+        @Override
+        <T> T accept(Visitor<T> visitor) {
+            return visitor.visitSuperExpr(this);
+        }
+
+        public Token getKeyword() {
+            return keyword;
+        }
+
+        public Token getMethod() {
+            return method;
         }
     }
 

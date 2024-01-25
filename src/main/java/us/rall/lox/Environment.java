@@ -7,7 +7,7 @@ import java.util.Map;
  * Represents a Lox environment.
  */
 public class Environment {
-    final Environment enclosing;
+    private final Environment enclosing;
     private final Map<String, Object> values = new HashMap<>();
 
     public Environment() {
@@ -55,6 +55,17 @@ public class Environment {
     }
 
     /**
+     * Assign a value to a variable in an ancestor environment.
+     *
+     * @param distance The number of ancestor environments.
+     * @param name     The name of the variable.
+     * @param value    The value of the variable.
+     */
+    void assignAt(int distance, Token name, Object value) {
+        ancestor(distance).values.put(name.lexeme(), value);
+    }
+
+    /**
      * Define a variable.
      *
      * @param name  The name of the variable.
@@ -62,5 +73,24 @@ public class Environment {
      */
     void define(String name, Object value) {
         values.put(name, value);
+    }
+
+    /**
+     * Get a variable by name and number of ancestor environments.
+     *
+     * @param distance The number of ancestor environments.
+     * @param name     The name of the variable.
+     * @return The value of the variable.
+     */
+    Object getAt(int distance, String name) {
+        return ancestor(distance).values.get(name);
+    }
+
+    private Environment ancestor(int distance) {
+        Environment environment = this;
+        for (int i = 0; i < distance; i++) {
+            environment = environment.enclosing;
+        }
+        return environment;
     }
 }

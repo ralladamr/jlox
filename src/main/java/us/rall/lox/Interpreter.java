@@ -1,13 +1,16 @@
 package us.rall.lox;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * A tree-walk interpreter for Lox.
  */
 class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     private final Environment globals = new Environment();
+    private final Map<Expr, Integer> locals = new HashMap<>();
     private Environment environment = globals;
 
     Interpreter() {
@@ -89,10 +92,26 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
         }
     }
 
+    /**
+     * Resolve Lox expression.
+     *
+     * @param expr  The expression to resolve.
+     * @param depth The scope depth of the expression.
+     */
+    void resolve(Expr expr, int depth) {
+        locals.put(expr, depth);
+    }
+
     @Override
     public Object visitAssignExpr(Expr.Assign expr) {
         Object value = evaluate(expr.getValue());
-        environment.assign(expr.getName(), value);
+        Token name = expr.getName();
+        Integer distance = locals.get(expr);
+        if (distance != null) {
+            environment.assignAt(distance, name, value);
+        } else {
+            globals.assign(name, value);
+        }
         return value;
     }
 
@@ -201,7 +220,15 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
     @Override
     public Object visitVariableExpr(Expr.Variable expr) {
-        return environment.get(expr.getName());
+        return lookUpVariable(expr.getName(), expr);
+    }
+
+    private Object lookUpVariable(Token name, Expr expr) {
+        Integer distance = locals.get(expr);
+        if (distance != null) {
+            return environment.getAt(distance, name.lexeme());
+        }
+        return globals.get(name);
     }
 
     private Object evaluate(Expr expr) {

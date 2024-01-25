@@ -38,6 +38,14 @@ abstract class Stmt {
         T visitExpressionStmt(Expression stmt);
 
         /**
+         * Visit an if statement.
+         *
+         * @param stmt The statement to visit.
+         * @return A representation of the statement.
+         */
+        T visitIfStmt(If stmt);
+
+        /**
          * Visit a print statement.
          *
          * @param stmt The statement to visit.
@@ -91,6 +99,38 @@ abstract class Stmt {
 
         public Expr getExpression() {
             return expression;
+        }
+    }
+
+    /**
+     * Represents a Lox if statement.
+     */
+    static class If extends Stmt {
+        private final Expr condition;
+        private final Stmt thenBranch;
+        private final Stmt elseBranch;
+
+        If(Expr condition, Stmt thenBranch, Stmt elseBranch) {
+            this.condition = condition;
+            this.thenBranch = thenBranch;
+            this.elseBranch = elseBranch;
+        }
+
+        @Override
+        <T> T accept(Visitor<T> visitor) {
+            return visitor.visitIfStmt(this);
+        }
+
+        public Expr getCondition() {
+            return condition;
+        }
+
+        public Stmt getThenBranch() {
+            return thenBranch;
+        }
+
+        public Stmt getElseBranch() {
+            return elseBranch;
         }
     }
 

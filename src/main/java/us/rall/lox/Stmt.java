@@ -54,6 +54,14 @@ abstract class Stmt {
         T visitPrintStmt(Print stmt);
 
         /**
+         * Visit a while statement.
+         *
+         * @param stmt The statement to visit.
+         * @return A representation of the statement.
+         */
+        T visitWhileStmt(While stmt);
+
+        /**
          * Visit a var statement.
          *
          * @param stmt The statement to visit.
@@ -151,6 +159,32 @@ abstract class Stmt {
 
         public Expr getExpression() {
             return expression;
+        }
+    }
+
+    /**
+     * Represents a while statement.
+     */
+    static class While extends Stmt {
+        private final Expr condition;
+        private final Stmt body;
+
+        While(Expr condition, Stmt body) {
+            this.condition = condition;
+            this.body = body;
+        }
+
+        @Override
+        <T> T accept(Visitor<T> visitor) {
+            return visitor.visitWhileStmt(this);
+        }
+
+        public Expr getCondition() {
+            return condition;
+        }
+
+        public Stmt getBody() {
+            return body;
         }
     }
 

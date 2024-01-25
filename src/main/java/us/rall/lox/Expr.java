@@ -52,6 +52,14 @@ abstract class Expr {
         T visitLiteralExpr(Literal expr);
 
         /**
+         * Visit a logical expression.
+         *
+         * @param expr The expression to visit.
+         * @return A representation of the expression.
+         */
+        T visitLogicalExpr(Logical expr);
+
+        /**
          * Visit a unary expression.
          *
          * @param expr The expression to visit.
@@ -163,6 +171,38 @@ abstract class Expr {
 
         public Object getValue() {
             return value;
+        }
+    }
+
+    /**
+     * A logical expression.
+     */
+    static class Logical extends Expr {
+        private final Expr left;
+        private final Token operator;
+        private final Expr right;
+
+        Logical(Expr left, Token operator, Expr right) {
+            this.left = left;
+            this.operator = operator;
+            this.right = right;
+        }
+
+        @Override
+        <T> T accept(Visitor<T> visitor) {
+            return visitor.visitLogicalExpr(this);
+        }
+
+        public Expr getLeft() {
+            return left;
+        }
+
+        public Token getOperator() {
+            return operator;
+        }
+
+        public Expr getRight() {
+            return right;
         }
     }
 

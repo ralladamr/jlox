@@ -182,6 +182,16 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     }
 
     @Override
+    public Object visitGetExpr(Expr.Get expr) {
+        Object object = evaluate(expr.getObject());
+        Token name = expr.getName();
+        if (object instanceof LoxInstance) {
+            return ((LoxInstance) object).get(name);
+        }
+        throw new RuntimeError(name, "Only instances have properties.");
+    }
+
+    @Override
     public Object visitGroupingExpr(Expr.Grouping expr) {
         return evaluate(expr.getExpression());
     }
@@ -202,6 +212,23 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
             return left;
         }
         return evaluate(expr.getRight());
+    }
+
+    @Override
+    public Object visitSetExpr(Expr.Set expr) {
+        Object object = evaluate(expr.getObject());
+        Token name = expr.getName();
+        if (!(object instanceof LoxInstance)) {
+            throw new RuntimeError(name, "Only instances have fields.");
+        }
+        Object value = evaluate(expr.getValue());
+        ((LoxInstance) object).set(name, value);
+        return value;
+    }
+
+    @Override
+    public Object visitThisExpr(Expr.This expr) {
+        return lookUpVariable(expr.getKeyword(), expr);
     }
 
     @Override
@@ -242,6 +269,21 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     }
 
     @Override
+    public Void visitClassStmt(Stmt.Class stmt) {
+        Token stmtName = stmt.getName();
+        environment.define(stmtName.lexeme(), null);
+        Map<String, LoxFunction> methods = new HashMap<>();
+        for (Stmt.Function method : stmt.getMethods()) {
+            String methodLexeme = method.getName().lexeme();
+            LoxFunction function = new LoxFunction(method, environment, methodLexeme.equals("init"));
+            methods.put(methodLexeme, function);
+        }
+        LoxClass klass = new LoxClass(stmtName.lexeme(), methods);
+        environment.assign(stmtName, klass);
+        return null;
+    }
+
+    @Override
     public Void visitExpressionStmt(Stmt.Expression stmt) {
         evaluate(stmt.getExpression());
         return null;
@@ -249,7 +291,7 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
     @Override
     public Void visitFunctionStmt(Stmt.Function stmt) {
-        LoxFunction function = new LoxFunction(stmt, environment);
+        LoxFunction function = new LoxFunction(stmt, environment, false);
         environment.define(stmt.getName().lexeme(), function);
         return null;
     }

@@ -95,6 +95,9 @@ class Parser {
     // Parser rules.
     private Stmt declaration() {
         try {
+            if (match(TokenType.CLASS)) {
+                return classDeclaration();
+            }
             if (match(TokenType.FUN)) {
                 return function("function");
             }
@@ -108,8 +111,19 @@ class Parser {
         }
     }
 
+    private Stmt classDeclaration() {
+        Token name = consume(TokenType.IDENTIFIER, "Expect class name.");
+        consume(TokenType.LEFT_BRACE, "Expect '{' before class body.");
+        List<Stmt.Function> methods = new ArrayList<>();
+        while (!check(TokenType.RIGHT_BRACE) && !isAtEnd()) {
+            methods.add(function("method"));
+        }
+        consume(TokenType.RIGHT_BRACE, "Expect '}' after class body.");
+        return new Stmt.Class(name, methods);
+    }
+
     @SuppressWarnings("ThrowableNotThrown")
-    private Stmt function(String kind) {
+    private Stmt.Function function(String kind) {
         Token name = consume(TokenType.IDENTIFIER, "Expect %s name.".formatted(kind));
         consume(TokenType.LEFT_PAREN, "Expect '(' after %s name.".formatted(kind));
         List<Token> params = new ArrayList<>();
@@ -257,9 +271,10 @@ class Parser {
         if (match(TokenType.EQUAL)) {
             Token equals = previous();
             Expr value = assignment();
-            if (expr instanceof Expr.Variable) {
-                Token name = ((Expr.Variable) expr).getName();
-                return new Expr.Assign(name, value);
+            if (expr instanceof Expr.Variable variable) {
+                return new Expr.Assign(variable.getName(), value);
+            } else if (expr instanceof Expr.Get get) {
+                return new Expr.Set(get.getObject(), get.getName(), value);
             }
             error(equals, "Invalid assignment target.");
         }
@@ -340,6 +355,9 @@ class Parser {
         while (true) {
             if (match(TokenType.LEFT_PAREN)) {
                 expr = finishCall(expr);
+            } else if (match(TokenType.DOT)) {
+                Token name = consume(TokenType.IDENTIFIER, "Expect property name after '.'.");
+                expr = new Expr.Get(expr, name);
             } else {
                 break;
             }
@@ -374,6 +392,9 @@ class Parser {
         }
         if (match(TokenType.NUMBER, TokenType.STRING)) {
             return new Expr.Literal(previous().literal());
+        }
+        if (match(TokenType.THIS)) {
+            return new Expr.This(previous());
         }
         if (match(TokenType.IDENTIFIER)) {
             return new Expr.Variable(previous());

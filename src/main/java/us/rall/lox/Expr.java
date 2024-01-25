@@ -46,6 +46,14 @@ abstract class Expr {
         T visitCallExpr(Call expr);
 
         /**
+         * Visit a get expression.
+         *
+         * @param expr The expression to visit.
+         * @return A representation of the expression.
+         */
+        T visitGetExpr(Get expr);
+
+        /**
          * Visit a grouping expression.
          *
          * @param expr The expression to visit.
@@ -68,6 +76,22 @@ abstract class Expr {
          * @return A representation of the expression.
          */
         T visitLogicalExpr(Logical expr);
+
+        /**
+         * Visit a set expression.
+         *
+         * @param expr The expression to visit.
+         * @return A representation of the expression.
+         */
+        T visitSetExpr(Set expr);
+
+        /**
+         * Visit a this expression.
+         *
+         * @param expr The expression to visit.
+         * @return A representation of the expression.
+         */
+        T visitThisExpr(This expr);
 
         /**
          * Visit a unary expression.
@@ -177,6 +201,32 @@ abstract class Expr {
     }
 
     /**
+     * A get expression.
+     */
+    static class Get extends Expr {
+        private final Expr object;
+        private final Token name;
+
+        Get(Expr object, Token name) {
+            this.object = object;
+            this.name = name;
+        }
+
+        @Override
+        <T> T accept(Visitor<T> visitor) {
+            return visitor.visitGetExpr(this);
+        }
+
+        public Expr getObject() {
+            return object;
+        }
+
+        public Token getName() {
+            return name;
+        }
+    }
+
+    /**
      * A grouping expression.
      */
     static class Grouping extends Expr {
@@ -245,6 +295,58 @@ abstract class Expr {
 
         public Expr getRight() {
             return right;
+        }
+    }
+
+    /**
+     * A set expression.
+     */
+    static class Set extends Expr {
+        private final Expr object;
+        private final Token name;
+        private final Expr value;
+
+        Set(Expr object, Token name, Expr value) {
+            this.object = object;
+            this.name = name;
+            this.value = value;
+        }
+
+        @Override
+        <T> T accept(Visitor<T> visitor) {
+            return visitor.visitSetExpr(this);
+        }
+
+        public Expr getObject() {
+            return object;
+        }
+
+        public Token getName() {
+            return name;
+        }
+
+        public Expr getValue() {
+            return value;
+        }
+    }
+
+    /**
+     * A this expression.
+     */
+    static class This extends Expr {
+        private final Token keyword;
+
+        This(Token keyword) {
+            this.keyword = keyword;
+        }
+
+        @Override
+        <T> T accept(Visitor<T> visitor) {
+            return visitor.visitThisExpr(this);
+        }
+
+        public Token getKeyword() {
+            return keyword;
         }
     }
 

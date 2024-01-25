@@ -30,6 +30,14 @@ abstract class Stmt {
         T visitBlockStmt(Block stmt);
 
         /**
+         * Visit a class statement.
+         *
+         * @param stmt The statement to visit.
+         * @return A representation of the statement.
+         */
+        T visitClassStmt(Class stmt);
+
+        /**
          * Visit an expression statement.
          *
          * @param stmt The statement to visit.
@@ -103,6 +111,32 @@ abstract class Stmt {
 
         public List<Stmt> getStatements() {
             return statements;
+        }
+    }
+
+    /**
+     * Represents a Lox class statement.
+     */
+    static class Class extends Stmt {
+        private final Token name;
+        private final List<Stmt.Function> methods;
+
+        Class(Token name, List<Stmt.Function> methods) {
+            this.name = name;
+            this.methods = methods;
+        }
+
+        @Override
+        <T> T accept(Visitor<T> visitor) {
+            return visitor.visitClassStmt(this);
+        }
+
+        public Token getName() {
+            return name;
+        }
+
+        public List<Function> getMethods() {
+            return methods;
         }
     }
 
